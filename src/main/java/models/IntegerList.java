@@ -169,7 +169,7 @@ public class IntegerList implements IntegerListAPI {
 
     @Override
     public boolean contains(Integer value) {
-        sortArrInteger();
+        arrInteger = sortArrInteger(null);
 
         int min = 0;
         int max = size - 1;
@@ -258,35 +258,63 @@ public class IntegerList implements IntegerListAPI {
 
     @Override
     public boolean equals(Integer[] otherArray) {
-        return false;
+
+        var sizeOtherArray = 0;
+        for (; sizeOtherArray < otherArray.length; sizeOtherArray++){
+            if (otherArray[sizeOtherArray] == null) {
+                break;
+            }
+        }
+
+        if ( size == 0 || otherArray == null || sizeOtherArray != size) {
+            return false;
+        }
+
+        arrInteger = sortArrInteger(null);
+
+        var otherArraySorted = sortArrInteger(otherArray);
+
+        for (var index = 0; index < size; index++) {
+            if (arrInteger[index] != otherArraySorted[index]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    @Override
-    public void sortArrInteger() {
+    public Integer[] sortArrInteger(Integer[] otherList) {
 
-        if (size == 0) {
-            return;
+        if (otherList == null) {
+            otherList = arrInteger;
+        }
+
+        if (otherList.length == 0) {
+            return null;
         }
 
         int in, out;
 
-        Integer[] sortedArrInteger = getClone();
-
         for(out = 1; out < size; out++) {
-            Integer temp = sortedArrInteger[out];
+            Integer temp = otherList[out];
 
             in = out;
-            while(in > 0 && sortedArrInteger[in-1].compareTo(temp) > 0 ) {
-                sortedArrInteger[in] = sortedArrInteger[in-1];
+            while(in > 0 && otherList[in-1].compareTo(temp) > 0 ) {
+                otherList[in] = otherList[in-1];
                 --in;
             }
 
             if (in < out) {
-                sortedArrInteger[in] = temp;
+                otherList[in] = temp;
             }
         }
 
-        arrInteger = sortedArrInteger;
+        return otherList;
+    }
+
+    @Override
+    public Integer[] sortArrInteger() {
+        return sortArrInteger(arrInteger);
     }
 
     @Override

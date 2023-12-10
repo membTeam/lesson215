@@ -24,7 +24,8 @@ public interface IntegerListAPI {
     Integer[] getClone();
 
     boolean equals(Integer[] otherArray);
-    void sortArrInteger();
+    Integer[] sortArrInteger();
+    Integer[] sortArrInteger(Integer[] otherList);
     boolean isEmpty();
     void clear();
     Integer[] toArray();

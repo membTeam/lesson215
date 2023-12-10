@@ -43,6 +43,48 @@ public class IntegerListTest {
     // ------------------------------
 
     @Test
+    public void equals() {
+        filingList(integerList, 5000);
+
+        var clone = integerList.getClone();
+        var size = integerList.getSize();
+
+        var val0 =  clone[0];
+        clone[0] = clone[size - 1];
+        clone[size-1] = val0;
+
+        var result = integerList.equals(clone);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void equalsDifferValueInLastIndex() {
+        filingList(integerList, 5000);
+
+        var clone = integerList.getClone();
+        var size = integerList.getSize();
+
+        clone[size-1] = 100;
+
+        var result = integerList.equals(clone);
+        assertFalse(result);
+    }
+
+    @Test
+    public void equalsNotEqualsSize() {
+        filingList(integerList, 5000);
+
+        var clone = integerList.getClone();
+        var size = integerList.getSize();
+
+        clone[size] = 100;
+
+        var result = integerList.equals(clone);
+        assertFalse(result);
+    }
+
+    @Test
     public void contains() {
         filingList(integerList, 10000);
 
@@ -115,7 +157,7 @@ public class IntegerListTest {
 
         var resClone = integerList.getClone();
 
-        assertEquals(integerList.getSize(), resClone.length );
+        assertEquals(integerList.getCapacity(), resClone.length );
     }
 
     @Test
