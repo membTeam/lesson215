@@ -11,7 +11,7 @@ public interface IntegerListAPI {
     Integer set(int index, Integer value);
 
     Integer remove(Integer value);
-    Integer remove(int index);
+    Integer removeByIndex(int index);
 
     boolean contains(Integer value);
 
@@ -20,11 +20,12 @@ public interface IntegerListAPI {
 
     Integer get(int index);
 
-    Integer[] getClone(Integer[] otherStringArray);
+    Integer[] getClone(Integer[] otherArray);
     Integer[] getClone();
 
-    boolean equals(Integer[] otherStringArray);
-    Integer[] sortArrayString(Integer[] strList);
+    boolean equals(Integer[] otherArray);
+    Integer[] sortArrInteger();
+    Integer[] sortArrInteger(Integer[] otherList);
     boolean isEmpty();
     void clear();
     Integer[] toArray();

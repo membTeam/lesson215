@@ -10,6 +10,7 @@ import models.IntegerList;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public class IntegerListTest {
 
@@ -27,6 +28,13 @@ public class IntegerListTest {
         }
     }
 
+    private int[] getRange() {
+        return new int[]{0,
+                integerList.getSize() - 2,
+                integerList.getSize() - 1,
+                -1, integerList.getCapacity() + 1 };
+    }
+
     @BeforeEach
     private void setUp() {
         integerList = new IntegerList();
@@ -34,43 +42,184 @@ public class IntegerListTest {
 
     // ------------------------------
 
+    @Test
+    public void equals() {
+        filingList(integerList, 5000);
+
+        var clone = integerList.getClone();
+        var size = integerList.getSize();
+
+        var val0 =  clone[0];
+        clone[0] = clone[size - 1];
+        clone[size-1] = val0;
+
+        var result = integerList.equals(clone);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void equalsDifferValueInLastIndex() {
+        filingList(integerList, 5000);
+
+        var clone = integerList.getClone();
+        var size = integerList.getSize();
+
+        clone[size-1] = 100;
+
+        var result = integerList.equals(clone);
+        assertFalse(result);
+    }
+
+    @Test
+    public void equalsNotEqualsSize() {
+        filingList(integerList, 5000);
+
+        var clone = integerList.getClone();
+        var size = integerList.getSize();
+
+        clone[size] = 100;
+
+        var result = integerList.equals(clone);
+        assertFalse(result);
+    }
+
+    @Test
+    public void contains() {
+        filingList(integerList, 10000);
+
+        var valForFind = integerList.get(500);
+        var contains = integerList.contains(valForFind);
+
+        assertTrue(contains);
+    }
+
+    @Test
+    public void sortArrInteger() {
+        filingList(integerList, 5);
+
+        integerList.sortArrInteger();
+        Integer valStart = integerList.get(0);
+        for (var index = 1; index < integerList.getSize(); index++) {
+            Integer valByIndex = integerList.get(index);
+            assertTrue(valStart < valByIndex);
+
+            valStart = valByIndex;
+        }
+    }
+
+    @Test
+    public void indexOf() {
+        filingList(integerList, 5);
+
+        int[] intRange = getRange();
+
+        for (var index = 0; index < intRange.length; index++  ) {
+
+            int indexRange = intRange[index];
+
+            if (integerList.isIndexCorrect(indexRange)) {
+                final int value = integerList.get(indexRange);
+                var indexValue = integerList.indexOf(value);
+
+                assertEquals(indexRange, indexValue);
+            } else {
+                assertThrows(ErrStringListException.class, ()-> integerList.get(indexRange));
+            }
+        }
+    }
+
+    @Test
+    public void lastIndexOf() {
+        filingList(integerList, 5);
+
+        int[] intRange = getRange();
+
+        for (var index = 0; index < intRange.length; index++  ) {
+
+            int indexRange = intRange[index];
+
+            if (integerList.isIndexCorrect(indexRange)) {
+                final int value = integerList.get(indexRange);
+                var indexValue = integerList.lastIndexOf(value);
+
+                assertEquals(indexRange, indexValue);
+            } else {
+                assertThrows(ErrStringListException.class, ()-> integerList.get(indexRange));
+            }
+        }
+    }
+
+    @Test
+    public void getClone() {
+
+        filingList(integerList, 5);
+
+        var resClone = integerList.getClone();
+
+        assertEquals(integerList.getCapacity(), resClone.length );
+    }
+
+    @Test
+    public void remove() {
+        filingList(integerList, 5);
+
+        var startSize = integerList.getSize();
+        var firstVal = integerList.get(0);
+        var lastVal = integerList.get(integerList.getSize()-1);
+
+        var regionVal = new Integer[]{firstVal, lastVal, 100};
+        for (var index = 0; index < regionVal.length; index++) {
+            var valueRegin = regionVal[index];
+
+            if (valueRegin != 100) {
+                var removeVal = integerList.remove(valueRegin);
+
+                assertTrue(integerList.indexOf(valueRegin) < 0);
+                assertEquals(--startSize, integerList.getSize());
+                assertEquals(valueRegin, removeVal);
+
+            } else {
+                assertThrows(ErrStringListException.class, ()-> integerList.remove(valueRegin));
+            }
+        }
+    }
+
     @ParameterizedTest
-    @ValueSource(ints = {0, 1000})
-    public void removeForIndex(int index) {
+    @ValueSource(ints = {4, 0, 1000})
+    public void removeByIndex(int index) {
         filingList(integerList, 5);
 
         if (index == 1000) {
-            assertThrows(ErrStringListException.class, () -> integerList.remove(index));
+            assertThrows(ErrStringListException.class, () -> integerList.removeByIndex(index));
         } else {
             var oldSize = integerList.getSize();
-            var lastIndex = integerList.getSize() - 1;
-            var valLast = integerList.get(lastIndex);
+            var valDeleted = integerList.get(index);
 
-            integerList.remove(0);
+            integerList.removeByIndex(index);
 
-            assertEquals(oldSize - 1, integerList.getSize());
-            assertEquals(valLast, integerList.get(integerList.getSize() - 1));
+            assertEquals(--oldSize, integerList.getSize());
+            assertEquals(-1, integerList.indexOf(valDeleted));
         }
-
     }
 
-
-    @Test
-    public void addWithIndex() {
+    @ParameterizedTest
+    @ValueSource(ints = {4, 0, 1000})
+    public void addWithIndex(int index) {
         filingList(integerList, 5);
 
-        System.out.println(integerList);
+        var sizeOld = integerList.getSize();
 
-        var oldData = integerList.get(4);
-        integerList.add(0, 1000);
+        if (index == 1000) {
+            assertThrows(ErrStringListException.class, () -> integerList.add(index, 1000));
+        } else {
+            var valBeforAdd = integerList.get(index);
+            var resAdd = integerList.add(index, 1000);
 
-        System.out.println(integerList);
-
-        var newSize = integerList.getSize();
-        assertEquals(6, integerList.getSize());
-
-        assertEquals(oldData, integerList.get(newSize -1));
-
+            assertEquals(1000, resAdd);
+            assertEquals(++sizeOld, integerList.getSize());
+            assertEquals(valBeforAdd, integerList.get(index+1));
+        }
     }
 
     @Test
