@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 
@@ -43,18 +44,20 @@ public class IntegerList implements IntegerListAPI {
             runException("null значение");
         }
     }
-    private void verifyIndex(int index) {
+    public void verifyIndex(int index) {
         if (index < 0 || index >= size ) {
             runException("Индекс за пределом допустимого значения");
         }
     }
-    private void verifyIndexGrup(int sizeAdd, int startIndex) {
-        if (size == capacity ) {
-            runException("Переполнение списка");
-        } else if (startIndex < 0 || startIndex >= capacity ) {
-            runException("Индекс за пределом допустимого значения");
+
+    public boolean isIndexCorrect(int index) {
+        if (index < 0 || index >= size ) {
+            return false;
         }
+
+        return true;
     }
+
     private void ifNecessaryExpand(int sizeAdd) {
         int newSize = size + sizeAdd;
         double newFillFactor = (newSize / (double) capacity);
@@ -72,6 +75,9 @@ public class IntegerList implements IntegerListAPI {
         }
     }
 
+    private int lastIndex() {
+        return size == 0 ? -1: size - 1;
+    }
 
     // -------------------------------------
 
@@ -142,11 +148,17 @@ public class IntegerList implements IntegerListAPI {
 
     @Override
     public Integer remove(Integer value) {
-        return null;
+
+        int index = indexOf(value);
+        if (index < 0) {
+            runException("Нет данных");
+        }
+
+        return removeByIndex(index);
     }
 
     @Override
-    public Integer remove(int index) {
+    public Integer removeByIndex(int index) {
         verifyIndex(index);
 
         var resultRemove = get(index);
@@ -157,17 +169,50 @@ public class IntegerList implements IntegerListAPI {
 
     @Override
     public boolean contains(Integer value) {
+        sortArrInteger();
+
+        int min = 0;
+        int max = size - 1;
+
+        while (min <= max) {
+            int mid = (min + max) / 2;
+
+            if (value == arrInteger[mid]) {
+                return true;
+            }
+
+            if (value < arrInteger[mid]) {
+                max = mid - 1;
+            } else {
+                min = mid + 1;
+            }
+        }
+
         return false;
     }
 
     @Override
     public int indexOf(Integer value) {
-        return 0;
+        verifyData(value);
+
+        var resIndex = IntStream.range(0, size)
+                .filter(index-> arrInteger[index].equals(value))
+                .map(index-> index)
+                .min();
+
+        return resIndex.isEmpty() ? -1 : resIndex.getAsInt();
     }
 
     @Override
     public int lastIndexOf(Integer value) {
-        return 0;
+        verifyData(value);
+
+        var resIndex = IntStream.range(0, size)
+                .filter(index-> arrInteger[index].equals(value))
+                .map(index-> index)
+                .max();
+
+        return resIndex.isEmpty() ? -1 : resIndex.getAsInt();
     }
 
     @Override
@@ -178,60 +223,95 @@ public class IntegerList implements IntegerListAPI {
     }
 
     @Override
-    public Integer[] getClone(Integer[] otherStringArray) {
-        return new Integer[0];
+    public Integer[] getClone(Integer[] otherArray) {
+        int capacityClone = 0;
+        for (var index = 0; index < otherArray.length; index++) {
+            if (otherArray[index] != null) {
+                capacityClone++;
+            }
+        }
+
+        var resArrString = new Integer[capacityClone];
+
+        for (var index = 0; index < otherArray.length; index++) {
+            if (otherArray[index] == null) {
+                continue;
+            }
+
+            resArrString[index] = otherArray[index];
+        }
+
+        return resArrString;
     }
 
     @Override
     public Integer[] getClone() {
-        return new Integer[0];
+
+        var resArrInteger = new Integer[capacity];
+
+        for (var index = 0; index < size; index++) {
+            resArrInteger[index] = arrInteger[index];
+        }
+
+        return resArrInteger;
     }
 
     @Override
-    public boolean equals(Integer[] otherStringArray) {
+    public boolean equals(Integer[] otherArray) {
         return false;
     }
 
     @Override
-    public Integer[] sortArrayString(Integer[] intList) {
+    public void sortArrInteger() {
+
+        if (size == 0) {
+            return;
+        }
+
         int in, out;
 
-        Integer[] resultArrInteger = intList == null ? arrInteger : intList;
+        Integer[] sortedArrInteger = getClone();
 
         for(out = 1; out < size; out++) {
-            Integer temp = resultArrInteger[out];
-
-            if (temp == null) {
-                continue;
-            }
+            Integer temp = sortedArrInteger[out];
 
             in = out;
-            while(in > 0 && resultArrInteger[in-1].compareTo(temp) > 0 ) {
-                resultArrInteger[in] = resultArrInteger[in-1];
+            while(in > 0 && sortedArrInteger[in-1].compareTo(temp) > 0 ) {
+                sortedArrInteger[in] = sortedArrInteger[in-1];
                 --in;
             }
 
             if (in < out) {
-                resultArrInteger[in] = temp;
+                sortedArrInteger[in] = temp;
             }
         }
 
-        return resultArrInteger;
-
+        arrInteger = sortedArrInteger;
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return size == 0;
     }
 
     @Override
     public void clear() {
-
+        arrInteger = new Integer[capacity];
     }
 
     @Override
     public Integer[] toArray() {
-        return new Integer[0];
+        if (size == 0) {
+            return null;
+        }
+
+        var resArrInteger = new Integer[size];
+
+        var index = 0;
+        while (index < size) {
+            resArrInteger[index] = arrInteger[index++];
+        }
+
+        return resArrInteger;
     }
 }
