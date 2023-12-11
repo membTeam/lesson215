@@ -17,7 +17,7 @@ public class IntegerList implements IntegerListAPI {
     @Getter
     private int size;
 
-    private double fillFactor = 0.75;
+    private double fillFactor = 0.9;
 
     public IntegerList() {
         initialDefault();
@@ -27,7 +27,6 @@ public class IntegerList implements IntegerListAPI {
         this.capacity = capacity;
         initialDefault();
     }
-
 
     @SneakyThrows(ErrStringListException.class)
     private void runException(String err) {
@@ -58,17 +57,20 @@ public class IntegerList implements IntegerListAPI {
         return true;
     }
 
-    private void ifNecessaryExpand(int sizeAdd) {
-        int newSize = size + sizeAdd;
+    private void grow() {
+        int newSize = size + 1;
         double newFillFactor = (newSize / (double) capacity);
 
         if (newFillFactor > fillFactor) {
-            var bufIndex = new Object(){  public int index = 0;  };
-            int newCapacity = (int) (newSize * (1 + fillFactor));
+            var tmpIndex = new Object(){
+                public int index = 0;
+            };
+
+            int newCapacity = (int) (capacity * 1.5);
 
             var newArray = new Integer[newCapacity];
             Stream.of(arrInteger).limit(size).forEach(str ->
-                    newArray[bufIndex.index] = arrInteger[bufIndex.index++]);
+                    newArray[tmpIndex.index] = arrInteger[tmpIndex.index++]);
 
             arrInteger = newArray;
             capacity = newCapacity;
@@ -138,7 +140,7 @@ public class IntegerList implements IntegerListAPI {
         verifyData(value);
         verifyIndex(index);
 
-        ifNecessaryExpand(1);
+        grow();
         offsetRight(index);
 
         arrInteger[index] = value;
@@ -150,7 +152,7 @@ public class IntegerList implements IntegerListAPI {
     public Integer append(Integer value) {
         verifyData(value);
 
-        ifNecessaryExpand(1);
+        grow();
 
         arrInteger[size++] = value;
 
@@ -322,6 +324,36 @@ public class IntegerList implements IntegerListAPI {
         }
 
         return true;
+    }
+
+
+    private void sortedByRecurs(Integer[] otherList, int out, int size) {
+
+        if (out < size) {
+            Integer temp = otherList[out];
+
+            int in = out;
+            while(in > 0 && otherList[in-1] > temp ) {
+                otherList[in] = otherList[in-1];
+                --in;
+            }
+
+            if (in < out) {
+                otherList[in] = temp;
+            }
+
+            sortedByRecurs(otherList, ++out, size);
+        }
+
+    }
+    public Integer[] sortArrIntegerByRecurs(Integer[] otherList) {
+
+        if (otherList.length < 5000) {
+            sortedByRecurs(otherList, 1, otherList.length);
+            return otherList;
+        } else {
+            return sortArrInteger(otherList);
+        }
     }
 
     public Integer[] sortArrInteger(Integer[] otherList) {
